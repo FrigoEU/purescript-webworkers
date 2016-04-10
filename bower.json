@@ -1,0 +1,17 @@
+{
+  "name": "purescript-webworkers",
+  "version": "0.0.1",
+  "moduleType": [
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-foreign": "1.0.0-rc.1",
+    "purescript-exceptions": "1.0.0-rc.1"
+  }
+}
