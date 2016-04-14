@@ -11,7 +11,7 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "1.0.0-rc.1",
-    "purescript-exceptions": "1.0.0-rc.1"
+    "purescript-foreign": "*",
+    "purescript-exceptions": "*"
   }
 }
