@@ -6,11 +6,14 @@
 exports.supportsWebWorkers = !!Worker;
 
 exports.mkWorker = function mkWorker(path){
+  return function(){
+    return new Worker(path);
+  };
+};
+exports.onmessageFromWorker = function(worker){
   return function(handler){
     return function(){
-      var w = new Worker(path);
-      w.onmessage = handler;
-      return new Worker(path);
+      worker.onmessage = handler;
     };
   };
 };

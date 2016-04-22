@@ -11,10 +11,12 @@ foreign import data OwnsWW :: !
 
 foreign import supportsWebWorkers :: Boolean
 
-foreign import mkWorker :: forall eff1 eff2.
+foreign import mkWorker :: forall eff.
                            String 
-                           -> (Foreign -> Eff eff1 Unit) 
-                           -> Eff (ownsww :: OwnsWW, exception :: EXCEPTION | eff2) WebWorker
+                           -> Eff (ownsww :: OwnsWW, exception :: EXCEPTION | eff) WebWorker
+foreign import onmessageFromWorker :: forall eff1 eff2. WebWorker 
+                                      -> (Foreign -> Eff eff1 Unit)
+                                      -> Eff (ownsww :: OwnsWW | eff2) Unit
 foreign import postMessageToWW :: forall eff. WebWorker 
                                               -> Foreign 
                                               -> Eff (ownsww :: OwnsWW | eff) Unit
