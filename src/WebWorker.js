@@ -1,7 +1,7 @@
 "use strict";
 
 // module WebWorker
-/* global exports, Worker, window, addEventListener */
+/* global exports, Worker, window, addEventListener, postMessage */
 
 exports.supportsWebWorkers = !!Worker;
 
@@ -13,7 +13,9 @@ exports.mkWorker = function mkWorker(path){
 exports.onmessageFromWorker = function(worker){
   return function(handler){
     return function(){
-      worker.onmessage = handler;
+      worker.onmessage = function(ev){
+        handler(ev)();
+      };
     };
   };
 };
@@ -29,10 +31,10 @@ exports.postMessageToWW = function postMessageToWW(worker){
 exports.postMessage = function(a){
   return function(){
     postMessage(a);
-  }
+  };
 };
 exports.onmessage = function(a){
   return function(){
-    addEventListener("message", a);
-  }
+    addEventListener("message", function(ev){return a(ev)(); });
+  };
 };
