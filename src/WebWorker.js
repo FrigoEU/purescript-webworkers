@@ -28,7 +28,7 @@ exports.postMessageToWW = function postMessageToWW(worker){
 
 exports.postMessage = function(a){
   return function(){
-    window.postMessage(a);
+    postMessage(a);
   }
 };
 exports.onmessage = function(a){
