@@ -13,5 +13,9 @@
   "dependencies": {
     "purescript-foreign": "*",
     "purescript-exceptions": "*"
+  },
+  "devDependencies": {
+    "purescript-test-unit": "*",
+    "purescript-timers": "*"
   }
 }

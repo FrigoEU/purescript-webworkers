@@ -20,7 +20,7 @@ exports.onmessageFromWorker = function(worker){
   };
 };
 
-exports.postMessageToWW = function postMessageToWW(worker){
+exports.postMessageToWorker = function postMessageToWorker(worker){
   return function(data){
     return function(){
       worker.postMessage(data);

@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "buildtestmain": "pulp build --main Test.Main && psc-bundle output/**/{index,foreign}.js --main Test.Main --module Test.Main --output static/testmain.js",
+    "buildtestworker": "pulp build --main Test.Worker && psc-bundle  output/**/{index,foreign}.js --main Test.Worker --module Test.Worker --output static/testworker.js"
+  }
+}
