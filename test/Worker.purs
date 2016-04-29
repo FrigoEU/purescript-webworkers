@@ -9,7 +9,11 @@ import Test.Main (Message(Message))
 import WebWorker (MessageEvent(MessageEvent), IsWW, postMessage, onmessage)
 
 main :: forall eff. Eff ( isww :: IsWW | eff ) Unit
-main = do
-  onmessage (\(MessageEvent {data: fn}) -> either (\_ -> postMessage $ toForeign (Message {message: "Failed to read Message in WW"})) 
-                                   (\(Message {message}) -> postMessage $ toForeign (Message {message: message <> message})) 
-                                   (read fn))
+main = onmessage handler
+  where
+    errorM = Message {message: "Failed to read Message in WW"}
+    succ m = Message {message: m <> m}
+    handler (MessageEvent {data: fn}) =
+      either (\_ -> postMessage $ toForeign errorM) 
+      (\(Message {message}) -> postMessage $ toForeign (succ message)) 
+      (read fn)

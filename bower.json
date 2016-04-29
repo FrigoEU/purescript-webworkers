@@ -12,7 +12,8 @@
   ],
   "dependencies": {
     "purescript-foreign": "*",
-    "purescript-exceptions": "*"
+    "purescript-exceptions": "*",
+    "purescript-argonaut-codecs": "*"
   },
   "devDependencies": {
     "purescript-test-unit": "*",

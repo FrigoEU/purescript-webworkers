@@ -11,10 +11,10 @@ exports.mkWorker = function mkWorker(path){
   };
 };
 exports.onmessageFromWorker = function(worker){
-  return function(handler){
+  return function(f){
     return function(){
       worker.onmessage = function(ev){
-        handler(ev)();
+        f(ev)();
       };
     };
   };
@@ -33,10 +33,10 @@ exports.postMessage = function(a){
     postMessage(a);
   };
 };
-exports.onmessage = function(a){
+exports.onmessage = function(f){
   return function(){
     onmessage = function(ev){
-      a(ev)();
+      f(ev)();
     };
   };
 };
