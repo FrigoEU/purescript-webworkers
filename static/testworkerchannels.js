@@ -1885,8 +1885,16 @@ var PS = {};
     "use strict";
   var $foreign = PS["WebWorker"];
   var Control_Monad_Eff = PS["Control.Monad.Eff"];
-  var Control_Monad_Eff_Console = PS["Control.Monad.Eff.Console"];
   var Control_Monad_Eff_Exception = PS["Control.Monad.Eff.Exception"];
+  var Data_Foreign = PS["Data.Foreign"];
+  var Prelude = PS["Prelude"];
+  exports["onmessage"] = $foreign.onmessage;
+  exports["postMessage"] = $foreign.postMessage;
+})(PS["WebWorker"] = PS["WebWorker"] || {});
+(function(exports) {
+    "use strict";
+  var Control_Monad_Eff = PS["Control.Monad.Eff"];
+  var Control_Monad_Eff_Console = PS["Control.Monad.Eff.Console"];
   var Data_Argonaut_Core = PS["Data.Argonaut.Core"];
   var Data_Argonaut_Decode = PS["Data.Argonaut.Decode"];
   var Data_Argonaut_Encode = PS["Data.Argonaut.Encode"];
@@ -1898,6 +1906,7 @@ var PS = {};
   var Data_Maybe = PS["Data.Maybe"];
   var Data_StrMap = PS["Data.StrMap"];
   var Prelude = PS["Prelude"];
+  var WebWorker = PS["WebWorker"];
   var Data_Foreign_Index = PS["Data.Foreign.Index"];
   var registerChannel = function (dictDecodeJson) {
       return function (chs) {
@@ -1915,7 +1924,7 @@ var PS = {};
   var postMessageC = function (dictEncodeJson) {
       return function (v) {
           return function (a) {
-              return $foreign.postMessage(Data_Foreign.toForeign({
+              return WebWorker.postMessage(Data_Foreign.toForeign({
                   type: v, 
                   message: Data_Argonaut_Printer.printJson(Data_Argonaut_Printer.printerString)(Data_Argonaut_Encode.encodeJson(dictEncodeJson)(a))
               }));
@@ -1924,6 +1933,10 @@ var PS = {};
   };
   var handleMessageWithChannels = function (chs) {
       return function (v) {
+        
+          /**
+         * handleMess :: {t :: String, m :: Foreign} -> Eff (console :: CONSOLE | eff) Unit
+         */  
           var handleMess = function (v1) {
               return Data_Either.either(Control_Monad_Eff_Console.log)(Prelude.id(Prelude.categoryFn))(Prelude.bind(Data_Either.bindEither)(Data_Maybe.maybe(Data_Either.Left.create("Couldn't find handler for channel " + v1.t))(Data_Either.Right.create)(Data_StrMap.lookup(v1.t)(chs)))(function (v2) {
                   return Prelude.bind(Data_Either.bindEither)(Data_Either.either(function (e) {
@@ -1950,13 +1963,13 @@ var PS = {};
       };
   };
   var onmessageC = function (chs) {
-      return $foreign.onmessage(handleMessageWithChannels(chs));
+      return WebWorker.onmessage(handleMessageWithChannels(chs));
   };
   exports["postMessageC"] = postMessageC;
   exports["handleMessageWithChannels"] = handleMessageWithChannels;
   exports["onmessageC"] = onmessageC;
   exports["registerChannel"] = registerChannel;
-})(PS["WebWorker"] = PS["WebWorker"] || {});
+})(PS["WebWorker.Channel"] = PS["WebWorker.Channel"] || {});
 (function(exports) {
     "use strict";
   var Control_Monad_Aff = PS["Control.Monad.Aff"];
@@ -1977,6 +1990,7 @@ var PS = {};
   var Test_Unit_Assert = PS["Test.Unit.Assert"];
   var Test_Unit_Console = PS["Test.Unit.Console"];
   var WebWorker = PS["WebWorker"];
+  var WebWorker_Channel = PS["WebWorker.Channel"];
   var Data_Maybe = PS["Data.Maybe"];
   var Data_Foreign_Index = PS["Data.Foreign.Index"];        
   var Message2 = function (x) {
@@ -2075,22 +2089,24 @@ var PS = {};
 (function(exports) {
     "use strict";
   var Control_Monad_Eff = PS["Control.Monad.Eff"];
+  var Control_Monad_Eff_Console = PS["Control.Monad.Eff.Console"];
   var Data_StrMap = PS["Data.StrMap"];
   var Prelude = PS["Prelude"];
   var Test_Main = PS["Test.Main"];
-  var WebWorker = PS["WebWorker"];        
+  var WebWorker = PS["WebWorker"];
+  var WebWorker_Channel = PS["WebWorker.Channel"];        
   var main = (function () {
-      var chstemp = WebWorker.registerChannel(Test_Main.decodeJsonMessage1)(Data_StrMap.empty)(Test_Main.message1Channel)(function (v) {
-          return WebWorker.postMessageC(Test_Main.encodeJsonMessage2)(Test_Main.message2Channel)({
+      var chstemp = WebWorker_Channel.registerChannel(Test_Main.decodeJsonMessage1)(Data_StrMap.empty)(Test_Main.message1Channel)(function (v) {
+          return WebWorker_Channel.postMessageC(Test_Main.encodeJsonMessage2)(Test_Main.message2Channel)({
               message: v.message + "workertestmess1"
           });
       });
-      var chs = WebWorker.registerChannel(Test_Main.decodeJsonMessage2)(chstemp)(Test_Main.message2Channel)(function (v) {
-          return WebWorker.postMessageC(Test_Main.encodeJsonMessage2)(Test_Main.message2Channel)({
+      var chs = WebWorker_Channel.registerChannel(Test_Main.decodeJsonMessage2)(chstemp)(Test_Main.message2Channel)(function (v) {
+          return WebWorker_Channel.postMessageC(Test_Main.encodeJsonMessage2)(Test_Main.message2Channel)({
               message: v.message + "testmess2"
           });
       });
-      return WebWorker.onmessageC(chs);
+      return WebWorker_Channel.onmessageC(chs);
   })();
   exports["main"] = main;
 })(PS["Test.WorkerChannels"] = PS["Test.WorkerChannels"] || {});

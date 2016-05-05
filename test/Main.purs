@@ -17,7 +17,8 @@ import Prelude (Unit, (==), ($), show, bind, return, (>>=))
 import Test.Unit (TIMER, timeout, test, runTest)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
-import WebWorker (Channel(Channel), onmessageFromWorkerC, postMessageToWorkerC, registerChannel, MessageEvent(MessageEvent), OwnsWW, onmessageFromWorker, postMessageToWorker, mkWorker)
+import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
+import WebWorker.Channel (onmessageFromWorkerC, registerChannel, postMessageToWorkerC, Channel(Channel))
 
 newtype Message = Message {message :: String}
 instance isForeignMessage :: IsForeign Message where
