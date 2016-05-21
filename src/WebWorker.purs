@@ -11,8 +11,6 @@ foreign import data OwnsWW :: !
 
 newtype MessageEvent = MessageEvent {data :: Foreign}
 
-foreign import supportsWebWorkers :: Boolean
-
 foreign import mkWorker :: forall eff.
                            String 
                            -> Eff (ownsww :: OwnsWW, exception :: EXCEPTION | eff) WebWorker

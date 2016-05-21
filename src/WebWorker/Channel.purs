@@ -1,4 +1,12 @@
-module WebWorker.Channel where
+module WebWorker.Channel (
+  registerChannel, 
+  Channel(..), 
+  Channels(..), 
+  onmessageC, 
+  onmessageFromWorkerC, 
+  postMessageC, 
+  postMessageToWorkerC
+  ) where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (log, CONSOLE)
