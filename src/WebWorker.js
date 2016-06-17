@@ -10,6 +10,11 @@ exports.mkWorker = function mkWorker(path){
     return new Worker(path);
   };
 };
+exports.terminateWorker = function terminateWorker(worker){
+  return function(){
+    worker.terminate();
+  };
+};
 exports.onmessageFromWorker = function(worker){
   return function(f){
     return function(){
