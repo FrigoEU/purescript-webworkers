@@ -20,7 +20,7 @@ import Data.Foreign (toForeign)
 import Data.Foreign.Class (readProp, read)
 import Data.Maybe (maybe)
 import Data.StrMap (insert, lookup, StrMap)
-import Prelude (unit, return, show, id, Unit, bind, (<>), (<$>), (<*>), ($))
+import Prelude (pure, unit, show, id, Unit, bind, (<>), (<$>), (<*>), ($))
 import WebWorker (postMessageToWorker, postMessage, MessageEvent(MessageEvent), onmessageFromWorker, onmessage, OwnsWW, WebWorker, IsWW)
 
 newtype Channel a = Channel String
@@ -44,7 +44,7 @@ onmessageFromWorkerC ww chs = onmessageFromWorker ww (handleMessageWithChannels 
 
 handleMessageWithChannels :: forall eff. Channels (console :: CONSOLE | eff) -> MessageEvent -> Eff (console :: CONSOLE | eff) Unit
 handleMessageWithChannels chs (MessageEvent {data: d})  = 
-  either (\_ -> return unit) handleMess ({t: _, m: _} <$> readProp "type" d <*> readProp "message" d)
+  either (\_ -> pure unit) handleMess ({t: _, m: _} <$> readProp "type" d <*> readProp "message" d)
     where 
       --handleMess :: {t :: String, m :: Foreign} -> Eff (console :: CONSOLE | eff) Unit
       handleMess {t, m} = 
@@ -52,7 +52,7 @@ handleMessageWithChannels chs (MessageEvent {data: d})  =
           handler <- maybe (Left $ "Couldn't find handler for channel " <> t) Right (lookup t chs)
           str <- either (\e -> Left $ "Couldn't parse message from channel " <> t <> " to string: " <> show e) Right (read m)
           json <- either (\e -> Left $ "Couldn't parse message from channel " <> t <> " to json: " <> show e) Right (jsonParser str)
-          return $ handler json
+          pure $ handler json
 
 postMessageC :: forall a eff. (EncodeJson a) => Channel a -> a -> Eff (isww :: IsWW | eff) Unit
 postMessageC (Channel str) a = postMessage (toForeign {type: str, message: ((printJson $ encodeJson a) :: String)})
