@@ -13,7 +13,7 @@ newtype MessageEvent = MessageEvent {data :: Foreign}
 
 foreign import mkWorker :: forall eff.
                            String 
-                           -> Eff (ownsww :: OwnsWW, exception :: EXCEPTION | eff) WebWorker
+                           -> Eff (ownsww :: OwnsWW, err :: EXCEPTION | eff) WebWorker
 foreign import terminateWorker :: forall eff.  WebWorker -> Eff (ownsww :: OwnsWW | eff) Unit
 foreign import onmessageFromWorker :: forall eff. WebWorker 
                                       -> (MessageEvent -> Eff (ownsww :: OwnsWW | eff) Unit)
