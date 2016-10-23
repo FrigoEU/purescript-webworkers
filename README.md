@@ -1,4 +1,4 @@
-Use Web Workers in PureScript
+## Use Web Workers in PureScript
 
 The WebWorker module just declares the usual JavaScript WebWorker interface enriched with PureScript type signatures. Note the IsWW and OwnsWW effects: These will "bubble up" to the top of your program and help you to seperate the WebWorker from the UI thread code, very handy!
 
