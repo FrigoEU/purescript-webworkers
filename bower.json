@@ -11,16 +11,11 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "1.0.0",
-    "purescript-exceptions": "1.0.0",
-    "purescript-argonaut-codecs": "1.0.0"
+    "purescript-foreign": "3.0.0",
+    "purescript-exceptions": "2.0.0",
+    "purescript-argonaut-codecs": "2.0.0"
   },
   "devDependencies": {
-    "purescript-test-unit": "7.0.0",
-    "purescript-timers": "1.0.0"
-  },
-  "resolutions": {
-    "purescript-eff": "^1.0.0",
-    "purescript-prelude": "~1.0.1"
+    "purescript-test-unit": "https://github.com/FrigoEU/purescript-test-unit.git#master"
   }
 }

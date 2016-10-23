@@ -1,6 +1,7 @@
 module Test.Worker where
 
 import Control.Monad.Eff (Eff)
+import Control.Monad.Except (runExcept)
 import Data.Either (either)
 import Data.Foreign (toForeign)
 import Data.Foreign.Class (read)
@@ -16,4 +17,4 @@ main = onmessage handler
     handler (MessageEvent {data: fn}) =
       either (\_ -> postMessage $ toForeign errorM) 
       (\(Message {message}) -> postMessage $ toForeign (succ message)) 
-      (read fn)
+      (runExcept $ read fn)

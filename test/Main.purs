@@ -6,6 +6,8 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, error)
+import Control.Monad.Eff.Timer (TIMER)
+import Control.Monad.Except (runExcept)
 import Data.Argonaut.Decode (gDecodeJson, class DecodeJson)
 import Data.Argonaut.Encode (class EncodeJson, gEncodeJson)
 import Data.Either (either)
@@ -13,18 +15,19 @@ import Data.Foreign (toForeign)
 import Data.Foreign.Class (read, readProp, class IsForeign)
 import Data.Generic (class Generic)
 import Data.StrMap (empty)
-import Prelude ((==), ($), (>>=), Unit, show, bind, return)
-import Test.Unit (TIMER, timeout, test, runTest)
+import Prelude (pure, (==), ($), (>>=), Unit, show, bind)
+import Test.Unit (timeout, test)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
+import Test.Unit.Main (runTest)
 import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 import WebWorker.Channel (onmessageFromWorkerC, registerChannel, postMessageToWorkerC, Channel(Channel))
 
 newtype Message = Message {message :: String}
 instance isForeignMessage :: IsForeign Message where
-  read obj = readProp "message" obj >>= \message -> return $ Message {message}
+  read obj = readProp "message" obj >>= \message -> pure $ Message {message}
 
-main :: forall eff. Eff ( timer :: TIMER , avar :: AVAR , testOutput :: TESTOUTPUT , ownsww :: OwnsWW, exception :: EXCEPTION, console :: CONSOLE | eff ) Unit
+main :: forall eff. Eff ( timer :: TIMER , avar :: AVAR , testOutput :: TESTOUTPUT , ownsww :: OwnsWW, err :: EXCEPTION, console :: CONSOLE | eff ) Unit
 main = runTest do
   test "make worker, send and receive Message object" do
     ww <- liftEff $ mkWorker "testworker.js"
@@ -32,7 +35,7 @@ main = runTest do
     timeout 1000 $ do mess <- makeAff (\err success -> do 
                                           onmessageFromWorker ww (\(MessageEvent {data: fn}) -> either (\e -> err $ error $ show e)
                                                                                         (\(Message {message}) -> success message)
-                                                                                        (read fn)))
+                                                                                        (runExcept $ read fn)))
                       assert "message is doubled" $ (mess == "testmessagetestmessage")
   test "make worker, send and receive with Channels" do
     ww <- liftEff $ mkWorker "testworkerchannels.js"
