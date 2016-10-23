@@ -1,6 +1,7 @@
 {
   "name": "purescript-webworkers",
   "version": "0.0.1",
+  "license": "MIT",
   "moduleType": [
     "node"
   ],
