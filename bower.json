@@ -12,12 +12,12 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "3.0.0",
-    "purescript-exceptions": "2.0.0",
-    "purescript-argonaut-codecs": "2.0.0"
+    "purescript-foreign": "4.0.0",
+    "purescript-exceptions": "3.0.0",
+    "purescript-argonaut-codecs": "3.0.0"
   },
   "devDependencies": {
-    "purescript-test-unit": "https://github.com/FrigoEU/purescript-test-unit.git#master"
+    "purescript-test-unit": "11.0.0"
   },
   "repository": {
     "type": "git",

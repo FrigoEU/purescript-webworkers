@@ -1,13 +1,13 @@
 module WebWorker where
 
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, kind Effect)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Data.Foreign (Foreign)
 import Prelude (Unit)
 
-foreign import data WebWorker :: *
-foreign import data IsWW :: !
-foreign import data OwnsWW :: !
+foreign import data WebWorker :: Type
+foreign import data IsWW :: Effect
+foreign import data OwnsWW :: Effect
 
 newtype MessageEvent = MessageEvent {data :: Foreign}
 
