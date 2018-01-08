@@ -8,14 +8,12 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, error)
 import Control.Monad.Eff.Timer (TIMER)
 import Control.Monad.Except (runExcept)
-import Data.Argonaut.Decode (gDecodeJson, class DecodeJson)
-import Data.Argonaut.Encode (class EncodeJson, gEncodeJson)
-import Data.Either (either)
-import Data.Foreign (toForeign)
-import Data.Foreign.Class (read, readProp, class IsForeign)
-import Data.Generic (class Generic)
+import Data.Either (Either, either)
+import Data.Foreign (Foreign, MultipleErrors, readString)
+import Data.Foreign.Index (readProp)
 import Data.StrMap (empty)
-import Prelude (pure, (==), ($), (>>=), Unit, show, bind)
+import Prelude (Unit, bind, discard, pure, show, ($), (==), (>>=))
+import Simple.JSON (readJSON, write, writeJSON)
 import Test.Unit (timeout, test)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
@@ -23,37 +21,26 @@ import Test.Unit.Main (runTest)
 import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 import WebWorker.Channel (onmessageFromWorkerC, registerChannel, postMessageToWorkerC, Channel(Channel))
 
-newtype Message = Message {message :: String}
-instance isForeignMessage :: IsForeign Message where
-  read obj = readProp "message" obj >>= \message -> pure $ Message {message}
+readMessage :: Foreign -> Either MultipleErrors { message :: String}                               
+readMessage obj = runExcept $ readProp "message" obj >>= readString >>= \message -> pure {message}
 
 main :: forall eff. Eff ( timer :: TIMER , avar :: AVAR , testOutput :: TESTOUTPUT , ownsww :: OwnsWW, err :: EXCEPTION, console :: CONSOLE | eff ) Unit
 main = runTest do
   test "make worker, send and receive Message object" do
     ww <- liftEff $ mkWorker "testworker.js"
-    liftEff $ postMessageToWorker ww $ toForeign (Message {message: "testmessage"})
-    timeout 1000 $ do mess <- makeAff (\err success -> do 
-                                          onmessageFromWorker ww (\(MessageEvent {data: fn}) -> either (\e -> err $ error $ show e)
-                                                                                        (\(Message {message}) -> success message)
-                                                                                        (runExcept $ read fn)))
+    _ <- liftEff $ postMessageToWorker ww $ write {message: "testmessage"}
+    timeout 1000 $ do mess <- makeAff \err success -> do onmessageFromWorker ww (\(MessageEvent {data: fn}) -> either (\e -> err $ error $ show e)
+                                                                                                                      (\({message}) -> success message)
+                                                                                                                      (readMessage fn))
                       assert "message is doubled" $ (mess == "testmessagetestmessage")
   test "make worker, send and receive with Channels" do
     ww <- liftEff $ mkWorker "testworkerchannels.js"
-    liftEff $ postMessageToWorkerC ww message1Channel (Message1 {message: "testmess1"})
-    timeout 1000 $ do mess <- makeAff (\err success -> let chs = registerChannel empty message2Channel (\(Message2 {message}) -> success message)
+    liftEff $ postMessageToWorkerC ww message1Channel {message: "testmess1"}
+    timeout 1000 $ do mess <- makeAff (\err success -> let chs = registerChannel empty message2Channel (\({message}) -> success message)
                                                         in onmessageFromWorkerC ww chs) 
                       assert "message is concatted" $ (mess == "testmess1workertestmess1")
 
-newtype Message1 = Message1 {message :: String}
-derive instance genericMessage1 :: Generic Message1
-instance encodeJsonMessage1 :: EncodeJson Message1 where encodeJson = gEncodeJson
-instance decodeJsonMessage1 :: DecodeJson Message1 where decodeJson = gDecodeJson
-newtype Message2 = Message2 {message :: String}
-derive instance genericMessage2 :: Generic Message2
-instance encodeJsonMessage2 :: EncodeJson Message2 where encodeJson = gEncodeJson
-instance decodeJsonMessage2 :: DecodeJson Message2 where decodeJson = gDecodeJson
-
-message1Channel :: Channel Message1
-message1Channel = Channel "message1" 
-message2Channel :: Channel Message2
-message2Channel = Channel "message2" 
+message1Channel :: Channel {message :: String}
+message1Channel = Channel { name: "message1", encode: writeJSON, decode: readJSON}
+message2Channel :: Channel {message :: String}
+message2Channel = Channel { name: "message2", encode: writeJSON, decode: readJSON}

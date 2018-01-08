@@ -16,6 +16,7 @@ Notice the phantom type Int in the above. This makes sure that the rest of the f
 ### Run tests
 
 ```
+pulp test
 npm run buildtestmain && npm run buildtestworker
 host ./static folder
 go to ./static/index and check console

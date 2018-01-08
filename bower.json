@@ -12,9 +12,10 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "4.0.0",
+    "purescript-foreign": "4.0.1",
     "purescript-exceptions": "3.0.0",
-    "purescript-argonaut-codecs": "3.0.0"
+    "purescript-maps": "^3.6.0",
+    "purescript-simple-json": "^1.1.0"
   },
   "devDependencies": {
     "purescript-test-unit": "11.0.0"

@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "buildtestmain": "pulp build --main Test.Main && psc-bundle output/**/{index,foreign}.js --main Test.Main --module Test.Main --output static/testmain.js",
-    "buildtestworker": "pulp build --main Test.Worker && psc-bundle  output/**/{index,foreign}.js --main Test.Worker --module Test.Worker --output static/testworker.js",
-    "buildtestworkerchannels": "pulp build --main Test.WorkerChannels && psc-bundle  output/**/{index,foreign}.js --main Test.WorkerChannels --module Test.WorkerChannels --output static/testworkerchannels.js",
+    "buildtestmain": "pulp build --main Test.Main && purs bundle output/**/{index,foreign}.js --main Test.Main --module Test.Main --output static/testmain.js",
+    "buildtestworker": "pulp build --main Test.Worker && purs bundle output/**/{index,foreign}.js --main Test.Worker --module Test.Worker --output static/testworker.js",
+    "buildtestworkerchannels": "pulp build --main Test.WorkerChannels && purs bundle output/**/{index,foreign}.js --main Test.WorkerChannels --module Test.WorkerChannels --output static/testworkerchannels.js",
     "buildtests": "npm run buildtestmain && npm run buildtestworker && npm run buildtestworkerchannels"
   },
   "devDependencies": {
