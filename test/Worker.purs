@@ -16,4 +16,4 @@ main = onmessage handler
     handler (MessageEvent {data: fn}) =
       either (\_ -> postMessage $ toForeign errorM) 
       (\({message}) -> postMessage $ toForeign (succ message)) 
-      (readMessage fn)
+      (runExcept $ readMessage fn)

@@ -12,7 +12,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (log, CONSOLE)
 import Control.Monad.Except (runExcept)
 import Data.Either (Either(Right, Left), either)
-import Data.Foreign (Foreign, MultipleErrors, readString, toForeign)
+import Data.Foreign (Foreign, MultipleErrors, F, readString, toForeign)
 import Data.Foreign.Index (readProp)
 import Data.Maybe (maybe)
 import Data.StrMap (insert, lookup, StrMap)
@@ -21,7 +21,7 @@ import WebWorker (postMessageToWorker, postMessage, MessageEvent(MessageEvent), 
 
 newtype Channel a = Channel { name :: String
                             , encode :: a -> String
-                            , decode :: String -> Either MultipleErrors a
+                            , decode :: String -> F a
                             }
 type Channels eff = StrMap (String -> Eff eff Unit)
 
@@ -32,7 +32,7 @@ registerChannel :: forall eff a. Channels (console :: CONSOLE | eff)
 registerChannel chs (Channel {name, decode}) handle =
   insert name (\str -> either (\_ -> log $ "Failed to decode string for channel " <> name)
                               handle
-                              (decode str)) chs
+                              (runExcept $ decode str )) chs
 
 onmessageC :: forall eff. Channels (isww :: IsWW, console :: CONSOLE | eff) -> Eff (isww :: IsWW, console :: CONSOLE | eff) Unit
 onmessageC chs = onmessage (handleMessageWithChannels chs)
