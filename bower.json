@@ -12,13 +12,13 @@
     "output"
   ],
   "dependencies": {
-    "purescript-foreign": "4.0.1",
-    "purescript-exceptions": "3.0.0",
-    "purescript-maps": "^3.6.0",
-    "purescript-simple-json": "^1.1.0"
+    "purescript-foreign": "5.0.0",
+    "purescript-exceptions": "4.0.0",
+    "purescript-simple-json": "^4.1.0",
+    "purescript-foreign-object": "^1.0.0"
   },
   "devDependencies": {
-    "purescript-test-unit": "11.0.0"
+    "purescript-test-unit": "14.0.0"
   },
   "repository": {
     "type": "git",

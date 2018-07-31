@@ -1,19 +1,19 @@
 module Test.Worker where
 
-import Control.Monad.Eff (Eff)
+import Prelude
+
 import Control.Monad.Except (runExcept)
 import Data.Either (either)
-import Data.Foreign (toForeign)
-import Prelude (Unit, ($), (<>))
+import Foreign (unsafeToForeign)
 import Test.Main (readMessage)
-import WebWorker (MessageEvent(MessageEvent), IsWW, postMessage, onmessage)
+import WebWorker (EffectR, IsWW, MessageEvent(MessageEvent), onmessage, postMessage)
 
-main :: forall eff. Eff ( isww :: IsWW | eff ) Unit
+main :: EffectR ( isww :: IsWW ) Unit
 main = onmessage handler
   where
     errorM = {message: "Failed to read Message in WW"}
     succ m = {message: m <> m}
     handler (MessageEvent {data: fn}) =
-      either (\_ -> postMessage $ toForeign errorM) 
-      (\({message}) -> postMessage $ toForeign (succ message)) 
+      either (\_ -> postMessage $ unsafeToForeign errorM)
+      (\({message}) -> postMessage $ unsafeToForeign (succ message))
       (runExcept $ readMessage fn)

@@ -8,53 +8,53 @@ module WebWorker.Channel (
   postMessageToWorkerC
   ) where
 
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (log, CONSOLE)
+import Prelude
+
 import Control.Monad.Except (runExcept)
 import Data.Either (Either(Right, Left), either)
-import Data.Foreign (Foreign, MultipleErrors, F, readString, toForeign)
-import Data.Foreign.Index (readProp)
 import Data.Maybe (maybe)
-import Data.StrMap (insert, lookup, StrMap)
-import Prelude (Unit, unit, pure, show, bind, id, ($), (<*>), (<$>), (<>), (>=>))
-import WebWorker (postMessageToWorker, postMessage, MessageEvent(MessageEvent), onmessageFromWorker, onmessage, OwnsWW, WebWorker, IsWW)
+import Effect.Class.Console (log)
+import Foreign (F, Foreign, readString, unsafeToForeign)
+import Foreign.Index (readProp)
+import Foreign.Object (Object, insert, lookup)
+import WebWorker (EffectR, IsWW, MessageEvent(MessageEvent), OwnsWW, WebWorker, onmessage, onmessageFromWorker, postMessage, postMessageToWorker, kind RoleWW)
 
 newtype Channel a = Channel { name :: String
                             , encode :: a -> String
                             , decode :: String -> F a
                             }
-type Channels eff = StrMap (String -> Eff eff Unit)
+type Channels (roles :: # RoleWW) = Object (String -> EffectR roles Unit)
 
-registerChannel :: forall eff a. Channels (console :: CONSOLE | eff)
-                                 -> Channel a
-                                 -> (a -> Eff (console :: CONSOLE | eff) Unit)
-                                 -> Channels (console :: CONSOLE | eff)
+registerChannel :: forall roles a. Channels roles
+                                   -> Channel a
+                                   -> (a -> EffectR roles Unit)
+                                   -> Channels roles
 registerChannel chs (Channel {name, decode}) handle =
   insert name (\str -> either (\_ -> log $ "Failed to decode string for channel " <> name)
                               handle
                               (runExcept $ decode str )) chs
 
-onmessageC :: forall eff. Channels (isww :: IsWW, console :: CONSOLE | eff) -> Eff (isww :: IsWW, console :: CONSOLE | eff) Unit
+onmessageC :: Channels (isww :: IsWW) -> EffectR (isww :: IsWW) Unit
 onmessageC chs = onmessage (handleMessageWithChannels chs)
 
-onmessageFromWorkerC :: forall eff. WebWorker -> Channels (ownsww :: OwnsWW, console :: CONSOLE | eff) -> Eff (ownsww :: OwnsWW, console :: CONSOLE | eff) Unit
+onmessageFromWorkerC :: WebWorker -> Channels (ownsww :: OwnsWW) -> EffectR (ownsww :: OwnsWW) Unit
 onmessageFromWorkerC ww chs = onmessageFromWorker ww (handleMessageWithChannels chs)
 
-handleMessageWithChannels :: forall eff. Channels (console :: CONSOLE | eff) -> MessageEvent -> Eff (console :: CONSOLE | eff) Unit
+handleMessageWithChannels :: forall roles. Channels roles -> MessageEvent -> EffectR roles Unit
 handleMessageWithChannels chs (MessageEvent {data: d})  =
   either (\_ -> pure unit)
          handleMess
          (runExcept $ {t: _, m: _} <$> (readProp "type" >=> readString) d <*> readProp "message" d)
     where
-      handleMess :: {t :: String, m :: Foreign} -> Eff (console :: CONSOLE | eff) Unit
+      handleMess :: {t :: String, m :: Foreign} -> EffectR roles Unit
       handleMess {t, m} =
-        either log id do
+        either log identity do
           handler <- maybe (Left $ "Couldn't find handler for channel " <> t) Right (lookup t chs)
           str <- either (\e -> Left $ "Couldn't parse message from channel " <> t <> " to string: " <> show e) Right (runExcept $ readString m)
           pure $ handler str
 
-postMessageC :: forall a eff. Channel a -> a -> Eff (isww :: IsWW | eff) Unit
-postMessageC (Channel {name, encode}) a = postMessage (toForeign {type: name, message: (encode a :: String)})
+postMessageC :: forall a. Channel a -> a -> EffectR (isww :: IsWW) Unit
+postMessageC (Channel {name, encode}) a = postMessage (unsafeToForeign {type: name, message: (encode a :: String)})
 
-postMessageToWorkerC :: forall a eff. WebWorker -> Channel a -> a -> Eff (ownsww :: OwnsWW | eff) Unit
-postMessageToWorkerC ww (Channel {name, encode}) a = postMessageToWorker ww (toForeign {type: name, message: encode a})
+postMessageToWorkerC :: forall a. WebWorker -> Channel a -> a -> EffectR (ownsww :: OwnsWW) Unit
+postMessageToWorkerC ww (Channel {name, encode}) a = postMessageToWorker ww (unsafeToForeign {type: name, message: encode a})
