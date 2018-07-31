@@ -3,7 +3,7 @@
 // module WebWorker
 /* global exports, Worker, window, onmessage, postMessage */
 
-exports.supportsWebWorkers = (typeof window !== "undefined" && window.Worker) ? true : false;
+// exports.supportsWebWorkers = (typeof window !== "undefined" && window.Worker) ? true : false;
 
 exports.mkWorker = function mkWorker(path){
   return function(){
